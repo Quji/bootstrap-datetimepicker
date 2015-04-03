@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
  * bootstrap-datetimepicker.js
  * =========================================================
  * Copyright 2012 Stefan Petre
@@ -643,36 +643,26 @@
 			var hoursDisabled = this.hoursDisabled || [];
 			for (var i = 0; i < 24; i++) {
 				if (hoursDisabled.indexOf(i) !== -1) continue;
-				var actual = UTCDate(year, month, dayMonth, i);
-				clsName = '';
-				// We want the previous hour for the startDate
-				if ((actual.valueOf() + 3600000) <= this.startDate || actual.valueOf() > this.endDate) {
-					clsName += ' disabled';
-				} else if (hours == i) {
-					clsName += ' active';
-				}
-				if (this.showMeridian && dates[this.language].meridiem.length == 2) {
-					meridian = (i < 12 ? dates[this.language].meridiem[0] : dates[this.language].meridiem[1]);
-					if (meridian != meridianOld) {
-						if (meridianOld != '') {
-							html.push('</fieldset>');
-						}
-						html.push('<fieldset class="hour"><legend>' + meridian.toUpperCase() + '</legend>');
-					}
-					meridianOld = meridian;
-					txt = (i % 12 ? i % 12 : 12);
-					html.push('<span class="hour' + clsName + ' hour_' + (i < 12 ? 'am' : 'pm') + '">' + txt + '</span>');
-					if (i == 23) {
-						html.push('</fieldset>');
-					}
-				} else {
-					txt = i + ':00';
-					html.push('<span class="hour' + clsName + '">' + txt + '</span>');
-				}
+                for (var k = 0; k < 60; k += this.minuteStep) {
+                    var actual = UTCDate(year, month, dayMonth, i, k, 0);
+                    var clsName = '';
+                    // We want the previous hour for the startDate
+                    if ((actual.valueOf() + 3600000) <= this.startDate || actual.valueOf() > this.endDate) {
+                        clsName += ' disabled';
+                    } else if (i == hours && k == minutes) {
+                        clsName += ' active';
+                    }
+                    txt = (i < 10 ? '0' + i : i) + ':';
+                    txt += (k < 10 ? '0' + k : k);
+
+                    html.push('<span class="hour minute' + clsName + '">' + txt + '</span>');
+                }
 			}
 			this.picker.find('.datetimepicker-hours td').html(html.join(''));
 
+
 			html = [];
+        /*
 			txt = '', meridian = '', meridianOld = '';
 			var minutesDisabled = this.minutesDisabled || [];
 			for (var i = 0; i < 60; i += this.minuteStep) {
@@ -705,6 +695,7 @@
 					html.push('<span class="minute' + clsName + '">' + hours + ':' + (i < 10 ? '0' + i : i) + '</span>');
 				}
 			}
+            */
 			this.picker.find('.datetimepicker-minutes td').html(html.join(''));
 
 			var currentYear = this.date.getUTCFullYear();
@@ -961,7 +952,8 @@
 								if (this.viewSelect >= 1) {
 									this._setDate(UTCDate(year, month, day, hours, minutes, seconds, 0));
 								}
-							} else if (target.is('.minute')) {
+							}
+                            if (target.is('.minute')) {
 								minutes = parseInt(target.text().substr(target.text().indexOf(':') + 1), 10) || 0;
 								this.viewDate.setUTCMinutes(minutes);
 								this.element.trigger({
