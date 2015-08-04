@@ -29,6 +29,19 @@
 
 !function ($) {
 
+    function elementOrParentIsFixed(element) {
+        var $element = $(element);
+        var $checkElements = $element.add($element.parents());
+        var isFixed = false;
+        $checkElements.each(function(){
+            if ($(this).css("position") === "fixed") {
+                isFixed = true;
+                return false;
+            }
+        });
+        return isFixed;
+    }
+
 	function UTCDate() {
 		return new Date(Date.UTC.apply(Date, arguments));
 	}
@@ -503,7 +516,9 @@
 			top = top - containerOffset.top;
 			left = left - containerOffset.left;
 
-			if(this.container != 'body') top = top + document.body.scrollTop
+            if( !elementOrParentIsFixed(this.element) ){
+			    top = top + document.body.scrollTop;
+            }
 
 			this.picker.css({
 				top:    top,
@@ -706,7 +721,9 @@
 				.find('span').removeClass('active');
 			if (currentYear == year) {
 				// getUTCMonths() returns 0 based, and we need to select the next one
-				months.eq(this.date.getUTCMonth() + 2).addClass('active');
+                // To cater bootstrap 2 we don't need to select the next one
+                var offset = months.length - 12;
+				months.eq(this.date.getUTCMonth() + offset).addClass('active');
 			}
 			if (year < startYear || year > endYear) {
 				months.addClass('disabled');
@@ -1046,6 +1063,8 @@
 				type: 'changeDate',
 				date: this.date
 			});
+			if(date == null)
+				this.date = this.viewDate;
 		},
 
 		moveMinute: function (date, dir) {
@@ -1665,9 +1684,9 @@
 		},
 		headTemplate:     '<thead>' +
 							  '<tr>' +
-							  '<th class="prev"><i class="{leftArrow}"/></th>' +
+							  '<th class="prev"><i class="{iconType} {leftArrow}"/></th>' +
 							  '<th colspan="5" class="switch"></th>' +
-							  '<th class="next"><i class="{rightArrow}"/></th>' +
+							  '<th class="next"><i class="{iconType} {rightArrow}"/></th>' +
 							  '</tr>' +
 			'</thead>',
 		headTemplateV3:   '<thead>' +
